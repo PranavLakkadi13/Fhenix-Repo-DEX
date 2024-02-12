@@ -1,24 +1,24 @@
 const { FhenixClient,getPermit } = require("fhenixjs");
 const { deployments,ethers } = require("hardhat");
-// const { Instance } = require("./FHEisntance");
+const { Instance } = require("./FHEisntance");
 
 let instance;
 // // let permission;
 const provider = ethers.provider;
 instance = new FhenixClient({provider});
 
-async function Instance(contractAddress) {
-  const permit = await getPermit(contractAddress,provider);
-  if (!permit) {
-    throw new Error("Failed to get permit from FhenixClient");
-  }
+// async function Instance(contractAddress) {
+//   const permit = await getPermit(contractAddress,provider);
+//   if (!permit) {
+//     throw new Error("Failed to get permit from FhenixClient");
+//   }
 
-  instance.storePermit(permit);
-  const permission = instance.extractPermitPermission(permit);
+//   instance.storePermit(permit);
+//   const permission = instance.extractPermitPermission(permit);
   
-  console.log("The Instance has been created");
-  return {instance,permission};
-}
+//   console.log("The Instance has been created");
+//   return {instance,permission};
+// }
 
 async function PairTest() {
     const accounts = await ethers.getSigners();
@@ -61,9 +61,17 @@ async function PairTest() {
     // const ETHEncryptedBalKey = await MockBTC.connect(signer).balanceOf(accounts[0].address,ETHInstance.permission);
     // const ETHBalanceDecrypted = await BTCInstance.instance.unseal(ETH.address,ETHEncryptedBalKey);
 
+    const encryptedAmount = await instance.encrypt_uint32(1000);
 
+    console.log(MockBTC);
     
-    const ApproveBTC = await MockBTC.approve(PAIR.address,)
+    const ApproveBTC = await MockBTC.approve(PAIR.address,encryptedAmount);
+    console.log("Approved MockBTC Successfully");
+
+    const ApproveETH = await MockETH.approve(PAIR.address,encryptedAmount);
+    console.log("Approved MockETH Successfully");
+
+    const LiquidityAdded = await PairTest.addLiquidity(encryptedAmount,encryptedAmount);
 }
 
 PairTest().then(() => process.exit(0))
