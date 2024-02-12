@@ -38,5 +38,9 @@
     "hardhat-deploy": "^0.11.45",
     "hardhat-gas-reporter": "^1.0.10",
     "solidity-coverage": "^0.8.6"
+  },
+  "dependencies": {
+    "axios": "^1.6.7",
+    "ethers": "^5.7.2"
   }
 }
