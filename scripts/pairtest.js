@@ -2,10 +2,10 @@ const { FhenixClient,getPermit } = require("fhenixjs");
 const { deployments,ethers } = require("hardhat");
 const { Instance } = require("./FHEisntance");
 
-let instance;
+// let instance;
 // // let permission;
-const provider = ethers.provider;
-instance = new FhenixClient({provider});
+// const provider = ethers.provider;
+// instance = new FhenixClient({provider});
 
 // async function Instance(contractAddress) {
 //   const permit = await getPermit(contractAddress,provider);
@@ -23,8 +23,6 @@ instance = new FhenixClient({provider});
 async function PairTest() {
     const accounts = await ethers.getSigners();
     const signer = accounts[0];
-    console.log(signer.address);
-    console.log(accounts[0].address);
 
     await deployments.fixture(["all"]);
 
@@ -61,17 +59,18 @@ async function PairTest() {
     // const ETHEncryptedBalKey = await MockBTC.connect(signer).balanceOf(accounts[0].address,ETHInstance.permission);
     // const ETHBalanceDecrypted = await BTCInstance.instance.unseal(ETH.address,ETHEncryptedBalKey);
 
-    const encryptedAmount = await instance.encrypt_uint32(1000);
-
-    console.log(MockBTC);
+    const encryptedAmount = await PAIRInstance.instance.encrypt_uint32(10);
+    const encryptedAmount1 = await PAIRInstance.instance.encrypt_uint32(15)
     
-    const ApproveBTC = await MockBTC.approve(PAIR.address,encryptedAmount);
+    const ApproveBTC = await MockBTC['approve(address,(bytes))'](PAIR.address,encryptedAmount);
     console.log("Approved MockBTC Successfully");
 
-    const ApproveETH = await MockETH.approve(PAIR.address,encryptedAmount);
+    const ApproveETH = await MockETH['approve(address,(bytes))'](PAIR.address,encryptedAmount1);
     console.log("Approved MockETH Successfully");
 
-    const LiquidityAdded = await PairTest.addLiquidity(encryptedAmount,encryptedAmount);
+    const LiquidityAdded = await PairTest.addLiquidity(encryptedAmount,encryptedAmount1);
+    
+    console.log("The shares minted: " + LiquidityAdded.toString());
 }
 
 PairTest().then(() => process.exit(0))

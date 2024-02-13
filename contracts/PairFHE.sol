@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 import "@fhenixprotocol/contracts/FHE.sol";
 import "./IEncryptedERC20.sol";
 import "@fhenixprotocol/contracts/access/Permissioned.sol";
+import {FHE, euint32, inEuint8} from "@fhenixprotocol/contracts/FHE.sol";
 
 contract EncryptedPair is Permissioned {
     // using FHE for euint32;
@@ -161,17 +162,17 @@ contract EncryptedPair is Permissioned {
         euint32 amount0 = FHE.asEuint32(_amount0);
         euint32 amount1 = FHE.asEuint32(_amount1);
 
-        bool t0 = token0.transferFrom(msg.sender, address(this), amount0);
-        bool t1 = token1.transferFrom(msg.sender, address(this), amount1);
+        bool t0 = token0.transferFrom(msg.sender, address(this), _amount0);
+        bool t1 = token1.transferFrom(msg.sender, address(this), _amount1);
 
         require(t0 && t1);
 
-        if (FHE.decrypt(reserve0.gt(FHE.asEuint32(0))) || FHE.decrypt(reserve1.gt(FHE.asEuint32(0)))) {
+        if (FHE.decrypt(FHE.or(FHE.gt(reserve0,FHE.asEuint32(0)), FHE.gt(reserve1,FHE.asEuint32(0))))) {
             FHE.req(FHE.eq(FHE.mul(reserve0, amount0),FHE.mul(reserve1,amount1)));
         }
 
         if (FHE.decrypt(FHE.gt(totalSupply,FHE.asEuint32(0)))) {
-            shares = _sqrt(FHE.mul(amount0, amount1));
+            shares = FHE.asEuint32(_sqrt(FHE.decrypt(FHE.mul(amount0, amount1))));
         }
         else {
             euint32 x = FHE.div(FHE.mul(amount0,totalSupply),reserve0);
@@ -230,32 +231,33 @@ contract EncryptedPair is Permissioned {
         token1.transfer(msg.sender, amount1);
     }
 
-    // function _sqrt(uint y) private pure returns (uint z) {
-    //     if (y > 3) {
-    //         z = y;
-    //         uint x = y / 2 + 1;
-    //         while (x < z) {
-    //             z = x;
-    //             x = (y / x + x) / 2;
-    //         }
-    //     } else if (y != 0) {
-    //         z = 1;
-    //     }
-    // }
-
-    function _sqrt(euint32 y) public pure returns (euint32 z) { 
-        if (FHE.decrypt(FHE.gt(y,FHE.asEuint32(uint256(3))))) {
+    function _sqrt(uint256 y) private pure returns (uint z) {
+        // uint256 y = FHE.decrypt(a); 
+        if (y > 3) {
             z = y;
-            euint32 x = FHE.add((FHE.div(y,FHE.asEuint32(uint256(2)))),FHE.asEuint32(uint256(1)));
-            while (FHE.decrypt(FHE.lt(x,z))) {
+            uint x = y / 2 + 1;
+            while (x < z) {
                 z = x;
-                x = FHE.div((FHE.div(y,FHE.add(x,x))),FHE.asEuint32(uint256(2)));
+                x = (y / x + x) / 2;
             }
-        }
-        else if (FHE.decrypt(FHE.ne(y,FHE.asEuint32(uint256(0))))) {
-            z = FHE.asEuint32(uint256(1));
+        } else if (y != 0) {
+            z = 1;
         }
     }
+
+    // function _sqrt(euint32 y) public pure returns (euint32 z) { 
+    //     if (FHE.decrypt(FHE.gt(y,FHE.asEuint32(uint256(3))))) {
+    //         z = y;
+    //         euint32 x = FHE.add((FHE.div(y,FHE.asEuint32(uint256(2)))),FHE.asEuint32(uint256(1)));
+    //         while (FHE.decrypt(FHE.lt(x,z))) {
+    //             z = x;
+    //             x = FHE.div((FHE.div(y,FHE.add(x,x))),FHE.asEuint32(uint256(2)));
+    //         }
+    //     }
+    //     else if (FHE.decrypt(FHE.ne(y,FHE.asEuint32(uint256(0))))) {
+    //         z = FHE.asEuint32(uint256(1));
+    //     }
+    // }
 
     function _min(euint32 x, euint32 y) private pure returns (euint32) {
         if (FHE.decrypt(FHE.lte(x, y))) {

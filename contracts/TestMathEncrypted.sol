@@ -23,7 +23,7 @@ contract TestMath {
             euint32 x = FHE.add(FHE.div(y, FHE.asEuint32(uint256(2))), FHE.asEuint32(uint256(1)));
             while (FHE.decrypt(FHE.lt(x, z))) {
                 z = x;
-                x = FHE.div(FHE.div(y, FHE.mul(x,FHE.asEuint32(uint256(2)))), FHE.asEuint32(uint256(2)));
+                x = FHE.div(FHE.div(y, FHE.add(x,x)), FHE.asEuint32(uint256(2)));
             }
         }
         else if (FHE.decrypt(FHE.ne(y, FHE.asEuint32(uint256(0))))) {
@@ -36,4 +36,5 @@ contract TestMath {
         euint32 z = sqrt(y);
         x = FHE.decrypt(z);
     }
+
 }
