@@ -243,17 +243,17 @@ contract EncryptedPair is Permissioned {
     //     }
     // }
 
-    function _sqrt(euint32 y) private pure returns (euint32 z) { 
-        if (FHE.decrypt(FHE.gt(y,FHE.asEuint32(3)))) {
+    function _sqrt(euint32 y) public pure returns (euint32 z) { 
+        if (FHE.decrypt(FHE.gt(y,FHE.asEuint32(uint256(3))))) {
             z = y;
-            euint32 x = FHE.add((FHE.div(y,FHE.asEuint32(2))),FHE.asEuint32(1));
+            euint32 x = FHE.add((FHE.div(y,FHE.asEuint32(uint256(2)))),FHE.asEuint32(uint256(1)));
             while (FHE.decrypt(FHE.lt(x,z))) {
                 z = x;
-                x = FHE.div((FHE.div(y,FHE.add(x,x))),FHE.asEuint32(2));
+                x = FHE.div((FHE.div(y,FHE.add(x,x))),FHE.asEuint32(uint256(2)));
             }
         }
-        else if (FHE.decrypt(FHE.ne(y,FHE.asEuint32(0)))) {
-            z = FHE.asEuint32(1);
+        else if (FHE.decrypt(FHE.ne(y,FHE.asEuint32(uint256(0))))) {
+            z = FHE.asEuint32(uint256(1));
         }
     }
 
