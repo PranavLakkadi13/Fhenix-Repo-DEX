@@ -68,9 +68,20 @@ async function PairTest() {
     const ApproveETH = await MockETH['approve(address,(bytes))'](PAIR.address,encryptedAmount1);
     console.log("Approved MockETH Successfully");
 
+    const BeforeLiquidityAddedBTCBalanceOfAMM = await MockBTC.EuintbalanceOf(PairTest.address);
+    console.log("The BTC balance of the AMM before liquidity added is : ", BeforeLiquidityAddedBTCBalanceOfAMM.toString());
+
+    const BeforeLiquidityAddedETHBalanceOfAMM = await MockETH.EuintbalanceOf(PairTest.address);
+    console.log("The ETH balance of the AMM brfore liquidty added is : ", BeforeLiquidityAddedETHBalanceOfAMM.toString());
+
     const LiquidityAdded = await PairTest.addLiquidity(encryptedAmount,encryptedAmount1);
-    
     console.log("The shares minted: " + LiquidityAdded.toString());
+
+    const AfterLiquidityAddedBTCBalanceOfAMM = await MockBTC.EuintbalanceOf(PAIR.address);
+    console.log("The BTC balance of the AMM after liquidity added is : ", AfterLiquidityAddedBTCBalanceOfAMM.toString());
+
+    const AfterLiquidityAddedETHBalanceOfAMM = await MockBTC.EuintbalanceOf(PAIR.address);
+    console.log("The ETH balance of the AMM after liquidity added is : ", AfterLiquidityAddedETHBalanceOfAMM.toString());
 }
 
 PairTest().then(() => process.exit(0))

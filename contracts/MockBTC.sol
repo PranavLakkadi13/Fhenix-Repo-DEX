@@ -76,7 +76,7 @@ contract MockBTC is Permissioned, Ownable2Step {
     }
 
     // Sets the `encryptedAmount` as the allowance of `spender` over the caller's tokens.
-    function approve(address spender, inEuint32 calldata encryptedAmount) external returns (bool) {
+    function approve(address spender, inEuint32 calldata encryptedAmount) public returns (bool) {
         approve(spender, FHE.asEuint32(encryptedAmount));
         return true;
     }
