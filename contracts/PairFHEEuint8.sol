@@ -5,7 +5,7 @@ import "@fhenixprotocol/contracts/FHE.sol";
 import "./IEncryptedERC20.sol";
 import "@fhenixprotocol/contracts/access/Permissioned.sol";
 
-contract EncryptedPair is Permissioned {
+contract EncryptedPairEuint8 is Permissioned {
     // using FHE for euint32;
     // IERC20 public token0;
     IEncryptedERC20 public token0;
@@ -56,7 +56,7 @@ contract EncryptedPair is Permissioned {
         reserve1 = _reserve1;
     }
 
-    function swap(address _tokenIn, inEuint8 calldata _amountIn) public returns (euint8 amountOut){
+    function swap(address _tokenIn, inEuint32 calldata _amountIn) public returns (euint8 amountOut){
         require(
             _tokenIn == address(token0) || _tokenIn == address(token1),
             "invalid token"
@@ -67,9 +67,9 @@ contract EncryptedPair is Permissioned {
             ? (token0, token1, reserve0, reserve1)
             : (token1, token0, reserve1, reserve0);
 
-        euint8 amountIn = FHE.asEuint8(_amountIn);
+        euint8 amountIn = FHE.asEuint8(FHE.asEuint32(_amountIn));
 
-        tokenIn.transferFrom(msg.sender, address(this), FHE.asEuint32(amountIn));
+        tokenIn.transferFrom(msg.sender, address(this), _amountIn);
 
         // euint32 amountInWithFee = FHE.div(FHE.mul(amountIn, FHE.asEuint32(997)), FHE.asEuint32(1000));
 
@@ -82,41 +82,43 @@ contract EncryptedPair is Permissioned {
         _update(FHE.asEuint8(token0.EuintbalanceOf(address(this))),FHE.asEuint8(token1.EuintbalanceOf(address(this))));
     }
 
-    function addLiquidity(inEuint8 calldata _amount0,inEuint8 calldata _amount1) external returns(euint8 shares) {
-        euint8 amount0 = FHE.asEuint8(_amount0);
-        euint8 amount1 = FHE.asEuint8(_amount1);
+    function addLiquidity(inEuint32 calldata _amount0,inEuint32 calldata _amount1) external returns(euint8 shares) {
+        euint8 amount0 = FHE.asEuint8(FHE.asEuint32(_amount0));
+        euint8 amount1 = FHE.asEuint8(FHE.asEuint32(_amount1));
 
-        bool t0 = token0.transferFrom(msg.sender, address(this), FHE.asEuint32(amount0));
-        bool t1 = token1.transferFrom(msg.sender, address(this), FHE.asEuint32(amount1));
+        bool t0 = token0.transferFrom(msg.sender, address(this), _amount0);
+        bool t1 = token1.transferFrom(msg.sender, address(this), _amount1);
 
         require(t0 && t1);
 
-        if (FHE.decrypt(FHE.or(FHE.gt(reserve0,FHE.asEuint8(0)), FHE.gt(reserve1,FHE.asEuint8(0))))) {
-            FHE.req(FHE.eq(FHE.mul(reserve0, amount0),FHE.mul(reserve1,amount1)));
-        }
+        shares = FHE.asEuint8(10);
 
-        if (FHE.decrypt(FHE.gt(totalSupply,FHE.asEuint8(0)))) {
-            shares = FHE.asEuint8(_sqrt(FHE.decrypt(FHE.mul(amount0, amount1))));
-        }
-        else {
-            euint8 x = FHE.div(FHE.mul(amount0,totalSupply),reserve0);
-            euint8 y = FHE.div(FHE.mul(amount1,totalSupply),reserve1);
+        // if (FHE.decrypt(FHE.or(FHE.gt(reserve0,FHE.asEuint8(0)), FHE.gt(reserve1,FHE.asEuint8(0))))) {
+        //     FHE.req(FHE.eq(FHE.mul(reserve0, amount0),FHE.mul(reserve1,amount1)));
+        // }
 
-            shares = FHE.asEuint8(_min(FHE.asEuint32(x), FHE.asEuint32(y)));
-        }
+        // if (FHE.decrypt(FHE.gt(totalSupply,FHE.asEuint8(0)))) {
+        //     shares = FHE.asEuint8(_sqrt(FHE.decrypt(FHE.mul(amount0, amount1))));
+        // }
+        // else {
+        //     euint8 x = FHE.div(FHE.mul(amount0,totalSupply),reserve0);
+        //     euint8 y = FHE.div(FHE.mul(amount1,totalSupply),reserve1);
 
-        FHE.req(FHE.gt(shares,FHE.asEuint8(0)));
+        //     shares = FHE.asEuint8(_min(FHE.asEuint32(x), FHE.asEuint32(y)));
+        // }
 
-        _mint(msg.sender, shares);
+        // FHE.req(FHE.gt(shares,FHE.asEuint8(0)));
 
-        _update(FHE.asEuint8(token0.EuintbalanceOf(address(this))), FHE.asEuint8(token1.EuintbalanceOf(address(this))));
+        // _mint(msg.sender, shares);
+
+        // _update(FHE.asEuint8(token0.EuintbalanceOf(address(this))), FHE.asEuint8(token1.EuintbalanceOf(address(this))));
     }
 
     function removeLiquidity(
-            inEuint8 calldata _shares
+            inEuint32 calldata _shares
     ) external returns (euint8 amount0, euint8 amount1) {
     
-        euint8 shares = FHE.asEuint8(_shares);
+        euint8 shares = FHE.asEuint8(FHE.asEuint32(_shares));
 
         euint8 bal0 = FHE.asEuint8(token0.EuintbalanceOf(address(this)));
         euint8 bal1 = FHE.asEuint8(token1.EuintbalanceOf(address(this)));

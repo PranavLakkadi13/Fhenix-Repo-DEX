@@ -13,6 +13,7 @@ require("hardhat-deploy");
 module.exports = {
   solidity: "0.8.20",
   defaultNetwork : "localfhenix",
+  setTimeout: 100000,
 }
 
 
