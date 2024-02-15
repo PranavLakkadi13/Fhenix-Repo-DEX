@@ -32,15 +32,15 @@
     "@openzeppelin/contracts": "^5.0.1",
     "chai": "^4.4.1",
     "cross-env": "^7.0.3",
-    "fhenix-hardhat-docker": "0.1.0-beta.11",
-    "fhenix-hardhat-plugin": "0.1.0-beta.11",
-    "hardhat": "^2.20.0",
+    "fhenix-hardhat-docker": "0.1.0-beta.15",
+    "fhenix-hardhat-plugin": "0.1.0-beta.15",
+    "hardhat": "^2.19.5",
     "hardhat-deploy": "^0.11.45",
     "hardhat-gas-reporter": "^1.0.10",
-    "solidity-coverage": "^0.8.7"
+    "solidity-coverage": "^0.8.6"
   },
   "dependencies": {
     "axios": "^1.6.7",
-    "ethers": "^5.7.2"
+    "ethers": "5.7.2"
   }
 }

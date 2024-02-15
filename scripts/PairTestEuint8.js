@@ -44,8 +44,8 @@ async function PairTest() {
     console.log("The name is ", nameBTC);
     console.log("The name is ", nameETH);
 
-    await MockBTC.mint(1000);
-    await MockETH.mint(1000);
+    await MockBTC.mint(10000);
+    await MockETH.mint(10000);
     console.log("Tokens successfully minted!!!!!")
 
     const BTCEuintBal = await MockBTC.EuintbalanceOf(accounts[0].address);
@@ -59,8 +59,8 @@ async function PairTest() {
     // const ETHEncryptedBalKey = await MockBTC.connect(signer).balanceOf(accounts[0].address,ETHInstance.permission);
     // const ETHBalanceDecrypted = await BTCInstance.instance.unseal(ETH.address,ETHEncryptedBalKey);
 
-    const encryptedAmount = await PAIRInstance.instance.encrypt_uint32(10);
-    const encryptedAmount1 = await PAIRInstance.instance.encrypt_uint32(15)
+    const encryptedAmount = await PAIRInstance.instance.encrypt_uint32(1000);
+    const encryptedAmount1 = await PAIRInstance.instance.encrypt_uint32(1500);
 
     const intailizeTokensInPairContract = await PairTest.initialize(MockBTC.address,MockETH.address);
     console.log("The tokens have been initalized!!!");
@@ -77,7 +77,10 @@ async function PairTest() {
     const BeforeLiquidityAddedETHBalanceOfAMM = await MockETH.EuintbalanceOf(PairTest.address);
     console.log("The ETH balance of the AMM brfore liquidty added is : ", BeforeLiquidityAddedETHBalanceOfAMM.toString());
 
-    const LiquidityAdded = await PairTest.addLiquidity(encryptedAmount,encryptedAmount1);
+
+    const encrypted8bitvalue = await PAIRInstance.instance.encrypt_uint8(5);
+
+    const LiquidityAdded = await PairTest.addLiquidity(encrypted8bitvalue,encrypted8bitvalue);
     console.log("The shares minted: " + LiquidityAdded.toString());
 
     const AfterLiquidityAddedBTCBalanceOfAMM = await MockBTC.EuintbalanceOf(PAIR.address);
