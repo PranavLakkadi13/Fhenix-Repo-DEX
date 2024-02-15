@@ -69,7 +69,8 @@ contract EncryptedPairEuint8 is Permissioned {
 
         euint8 amountIn = FHE.asEuint8(FHE.asEuint32(_amountIn));
 
-        tokenIn.transferFrom(msg.sender, address(this), _amountIn);
+        bool k = tokenIn.transferFrom(msg.sender, address(this), _amountIn);
+        require(k);
 
         // euint32 amountInWithFee = FHE.div(FHE.mul(amountIn, FHE.asEuint32(997)), FHE.asEuint32(1000));
 
@@ -77,7 +78,8 @@ contract EncryptedPairEuint8 is Permissioned {
 
         amountOut = FHE.div(FHE.mul(reserveOut, amountIn), FHE.add(reserveIn, amountIn));
 
-        tokenOut.transfer(msg.sender, FHE.asEuint32(amountOut));
+        bool t = tokenOut.transfer(msg.sender, FHE.asEuint32(amountOut));
+        require(t);
 
         _update(FHE.asEuint8(token0.EuintbalanceOf(address(this))),FHE.asEuint8(token1.EuintbalanceOf(address(this))));
     }
@@ -122,24 +124,28 @@ contract EncryptedPairEuint8 is Permissioned {
     function removeLiquidity(
             inEuint8 calldata _shares
     ) external returns (euint8 amount0, euint8 amount1) {
-    
-        euint8 shares = FHE.asEuint8(_shares);
 
+        euint8 shares = FHE.asEuint8(_shares);
+    
         euint8 bal0 = FHE.asEuint8(token0.EuintbalanceOf(address(this)));
         euint8 bal1 = FHE.asEuint8(token1.EuintbalanceOf(address(this)));
 
-        amount0 = FHE.div((FHE.mul(shares,bal0)),totalSupply);
-        amount1 = FHE.div((FHE.mul(shares,bal1)),totalSupply);
+        // amount0 = (_shares * bal0) / totalSupply;
+        amount0 = FHE.div(FHE.mul(shares, bal0),totalSupply);
+        // amount1 = (_shares * bal1) / totalSupply;
+        amount1 = FHE.div(FHE.mul(shares, bal1),totalSupply);
+        // require(amount0 > 0 && amount1 > 0, "amount0 or amount1 = 0");
+        FHE.req(FHE.and(FHE.gt(amount0,FHE.asEuint8(0)), FHE.gt(amount1,FHE.asEuint8(0))));
 
-        // FHE.req(FHE.and(FHE.gt(amount0,FHE.asEuint8(0)), FHE.gt(amount1,FHE.asEuint8(0))));
-        FHE.req(FHE.gt(amount0, FHE.asEuint8(0)));
-        FHE.req(FHE.gt(amount1,FHE.asEuint8(0)));
-
+        // _burn(msg.sender, _shares);
         _burn(msg.sender, shares);
-        _update(bal0 - amount0, bal1 - amount1);
-        
-        token0.transfer(msg.sender, FHE.asEuint32(amount0));
-        token1.transfer(msg.sender, FHE.asEuint32(amount1));
+        // _update(bal0 - amount0, bal1 - amount1);
+        _update(FHE.sub(bal0,amount0), FHE.sub(bal1,amount1));
+
+        bool t = token0.transfer(msg.sender, FHE.asEuint32(amount0));
+        bool t2 = token1.transfer(msg.sender, FHE.asEuint32(amount1));
+
+        require(t && t2);
     }
 
     function _sqrt(euint8 a) private pure returns (uint z) {

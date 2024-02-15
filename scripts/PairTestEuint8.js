@@ -66,7 +66,7 @@ async function PairTest() {
     console.log("The tokens have been initalized!!!");
     
     const ApproveBTC = await MockBTC['approve(address,(bytes))'](PAIR.address,encryptedAmount);
-    console.log("Approved MockBTC Successfully");
+    console.log("Approved MockBTC Successfully ", ApproveBTC.toString());
 
     const ApproveETH = await MockETH['approve(address,(bytes))'](PAIR.address,encryptedAmount1);
     console.log("Approved MockETH Successfully");
@@ -77,11 +77,16 @@ async function PairTest() {
     const BeforeLiquidityAddedETHBalanceOfAMM = await MockETH.EuintbalanceOf(PairTest.address);
     console.log("The ETH balance of the AMM brfore liquidty added is : ", BeforeLiquidityAddedETHBalanceOfAMM.toString());
 
-
+    const BalanceOfReserve0 = await PairTest.reserve0();
+    console.log("The balance of the Reserve0 before liquidity added : ", BalanceOfReserve0.toString());
+    
     const encrypted8bitvalue = await PAIRInstance.instance.encrypt_uint8(5);
 
     const LiquidityAdded = await PairTest.addLiquidity(encrypted8bitvalue,encrypted8bitvalue);
     console.log("The shares minted: " + LiquidityAdded.toString());
+
+    const BalanceOfReserve0After = await PairTest.reserve0();
+    console.log("The balance of the Reserve0 after liquidity added : ", BalanceOfReserve0After.toString());
 
     const AfterLiquidityAddedBTCBalanceOfAMM = await MockBTC.EuintbalanceOf(PAIR.address);
     console.log("The BTC balance of the AMM after liquidity added is : ", AfterLiquidityAddedBTCBalanceOfAMM.toString());
