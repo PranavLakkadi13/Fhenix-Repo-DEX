@@ -9,6 +9,9 @@ require("@nomicfoundation/hardhat-toolbox");
 require("fhenix-hardhat-plugin");
 require("fhenix-hardhat-docker");
 require("hardhat-deploy");
+require("dotenv").config();
+
+const Private_Key = process.env.Private_Key;
 
 module.exports = {
   solidity: {
@@ -19,6 +22,14 @@ module.exports = {
     ],
   },
   defaultNetwork : "localfhenix",
+  networks : {
+    fhenix: {
+      url: "https://test01.fhenix.zone/evm",
+      chainId: 412346,
+      accounts: [Private_Key],
+      timeout: 100000,
+    },
+  },
   setTimeout: 100000,
 }
 

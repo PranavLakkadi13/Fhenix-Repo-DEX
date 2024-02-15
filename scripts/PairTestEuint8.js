@@ -52,7 +52,7 @@ async function PairTest() {
     const ETHEuintBal = await MockETH.EuintbalanceOf(accounts[0].address);
 
     console.log("The encrypted balance in BTC is " + BTCEuintBal.toString());
-    console.log("The encrypted balance in BTC is " + ETHEuintBal.toString());
+    console.log("The encrypted balance in ETH is " + ETHEuintBal.toString());
 
     // const BTCEncryptedBalKey = await MockBTC.connect(signer).balanceOf(accounts[0].address,BTCInstance.permission);
     // const BTCBalanceDecrypted = await BTCInstance.instance.unseal(BTC.address,BTCEncryptedBalKey);
@@ -60,7 +60,7 @@ async function PairTest() {
     // const ETHBalanceDecrypted = await BTCInstance.instance.unseal(ETH.address,ETHEncryptedBalKey);
 
     const encryptedAmount = await PAIRInstance.instance.encrypt_uint32(1000);
-    const encryptedAmount1 = await PAIRInstance.instance.encrypt_uint32(1500);
+    const encryptedAmount1 = await PAIRInstance.instance.encrypt_uint32(1000);
 
     const intailizeTokensInPairContract = await PairTest.initialize(MockBTC.address,MockETH.address);
     console.log("The tokens have been initalized!!!");

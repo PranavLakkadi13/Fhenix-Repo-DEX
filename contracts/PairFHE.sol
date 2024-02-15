@@ -171,7 +171,7 @@ contract EncryptedPair is Permissioned {
         //     FHE.req(FHE.eq(FHE.mul(reserve0, amount0),FHE.mul(reserve1,amount1)));
         // }
 
-        // if (FHE.decrypt(FHE.gt(totalSupply,FHE.asEuint32(0)))) {
+        // if (FHE.decrypt(FHE.eq(totalSupply,FHE.asEuint32(0)))) {
         //     shares = FHE.asEuint32(_sqrt(FHE.decrypt(FHE.mul(amount0, amount1))));
         // }
         // else {
