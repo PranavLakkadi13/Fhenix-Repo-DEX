@@ -56,7 +56,7 @@ contract EncryptedPairEuint8 is Permissioned {
         reserve1 = _reserve1;
     }
 
-    function swap(address _tokenIn, inEuint32 calldata _amountIn) public returns (euint8 amountOut){
+    function swap(address _tokenIn, inEuint8 calldata _amountIn) public returns (euint8 amountOut){
         require(
             _tokenIn == address(token0) || _tokenIn == address(token1),
             "invalid token"
@@ -67,21 +67,24 @@ contract EncryptedPairEuint8 is Permissioned {
             ? (token0, token1, reserve0, reserve1)
             : (token1, token0, reserve1, reserve0);
 
-        euint8 amountIn = FHE.asEuint8(FHE.asEuint32(_amountIn));
+        euint8 amountIn = FHE.asEuint8(_amountIn);
 
-        bool k = tokenIn.transferFrom(msg.sender, address(this), _amountIn);
+        FHE.req(FHE.ne(amountIn,FHE.asEuint8(0)));
+
+        bool k = tokenIn.transferFrom(msg.sender, address(this), FHE.asEuint32(amountIn));
         require(k);
 
         // euint32 amountInWithFee = FHE.div(FHE.mul(amountIn, FHE.asEuint32(997)), FHE.asEuint32(1000));
 
         // amountOut = FHE.div(FHE.mul(reserveOut,amountInWithFee), FHE.add(reserveIn, amountInWithFee));
 
-        amountOut = FHE.div(FHE.mul(reserveOut, amountIn), FHE.add(reserveIn, amountIn));
+        // amountOut = FHE.div(FHE.mul(reserveOut, amountIn), FHE.add(reserveIn, amountIn));
+        // FHE.req(FHE.gt(amountOut,FHE.asEuint8(0)));
 
-        bool t = tokenOut.transfer(msg.sender, FHE.asEuint32(amountOut));
-        require(t);
+        // bool t = tokenOut.transfer(msg.sender, FHE.asEuint32(amountOut));
+        // require(t);
 
-        _update(FHE.asEuint8(token0.EuintbalanceOf(address(this))),FHE.asEuint8(token1.EuintbalanceOf(address(this))));
+        // _update(FHE.asEuint8(token0.EuintbalanceOf(address(this))),FHE.asEuint8(token1.EuintbalanceOf(address(this))));
     }
 
     function addLiquidity(inEuint8 calldata _amount0,inEuint8 calldata _amount1) external returns(euint8 shares) {
@@ -98,14 +101,9 @@ contract EncryptedPairEuint8 is Permissioned {
         }
 
         if (FHE.decrypt(FHE.eq(totalSupply,FHE.asEuint8(0)))) {
-            // shares = FHE.asEuint8(_sqrt(FHE.mul(amount0, amount1)));
-            // euint8 var1 = FHE.mul(amount0,amount1);
             shares = FHE.asEuint8(_sqrt(FHE.mul(amount0,amount1)));
         }
         else {
-        //     // totalSupply = FHE.asEuint8(25);
-        //     // reserve0 = FHE.asEuint8(1);
-        //     // reserve1 = FHE.asEuint8(1);
             euint8 x = FHE.div(FHE.mul(amount0,totalSupply),reserve0);
             euint8 y = FHE.div(FHE.mul(amount1,totalSupply),reserve1);
 
@@ -121,6 +119,7 @@ contract EncryptedPairEuint8 is Permissioned {
         return shares;
     }
 
+    
     function removeLiquidity(
             inEuint8 calldata _shares
     ) external returns (euint8 amount0, euint8 amount1) {
@@ -130,22 +129,29 @@ contract EncryptedPairEuint8 is Permissioned {
         euint8 bal0 = FHE.asEuint8(token0.EuintbalanceOf(address(this)));
         euint8 bal1 = FHE.asEuint8(token1.EuintbalanceOf(address(this)));
 
+        FHE.req(FHE.and(FHE.ne(bal0,FHE.asEuint8(0)),FHE.ne(bal1,FHE.asEuint8(0))));
+
         // amount0 = (_shares * bal0) / totalSupply;
         amount0 = FHE.div(FHE.mul(shares, bal0),totalSupply);
-        // amount1 = (_shares * bal1) / totalSupply;
+       
+        // // amount1 = (_shares * bal1) / totalSupply;
         amount1 = FHE.div(FHE.mul(shares, bal1),totalSupply);
-        // require(amount0 > 0 && amount1 > 0, "amount0 or amount1 = 0");
-        FHE.req(FHE.and(FHE.gt(amount0,FHE.asEuint8(0)), FHE.gt(amount1,FHE.asEuint8(0))));
+       
+        // // require(amount0 > 0 && amount1 > 0, "amount0 or amount1 = 0");
+        FHE.req(FHE.and(FHE.gt(amount0,FHE.asEuint8(0)),FHE.gt(amount1,FHE.asEuint8(0))));
 
-        // _burn(msg.sender, _shares);
+        // // // _burn(msg.sender, _shares);
         _burn(msg.sender, shares);
-        // _update(bal0 - amount0, bal1 - amount1);
+       
+        // // // _update(bal0 - amount0, bal1 - amount1);
         _update(FHE.sub(bal0,amount0), FHE.sub(bal1,amount1));
 
-        bool t = token0.transfer(msg.sender, FHE.asEuint32(amount0));
-        bool t2 = token1.transfer(msg.sender, FHE.asEuint32(amount1));
+        FHE.req(FHE.gt(FHE.asEuint32(amount0),FHE.asEuint32(0)));
 
-        require(t && t2);
+        bool t = token0.transfer(msg.sender, FHE.asEuint32(amount0));
+        // bool t2 = token1.transfer(msg.sender, FHE.asEuint32(amount1));
+
+        // require(t && t2);
     }
 
     function _sqrt(euint8 a) private pure returns (uint z) {
