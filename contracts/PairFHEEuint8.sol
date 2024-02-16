@@ -2,8 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@fhenixprotocol/contracts/FHE.sol";
-// import "./test/IEncryptedERC208bit.sol";
-import { IEncryptedERC208bit } from "./test/IEncryptedERC208bit.sol";
+import "./test/IEncryptedERC208bit.sol";
 import "@fhenixprotocol/contracts/access/Permissioned.sol";
 
 contract EncryptedPairEuint8 is Permissioned {
@@ -79,13 +78,13 @@ contract EncryptedPairEuint8 is Permissioned {
 
         // amountOut = FHE.div(FHE.mul(reserveOut,amountInWithFee), FHE.add(reserveIn, amountInWithFee));
 
-        // amountOut = FHE.div(FHE.mul(reserveOut, amountIn), FHE.add(reserveIn, amountIn));
-        // FHE.req(FHE.gt(amountOut,FHE.asEuint8(0)));
+        amountOut = FHE.div(FHE.mul(reserveOut, amountIn), FHE.add(reserveIn, amountIn));
+        FHE.req(FHE.gt(amountOut,FHE.asEuint8(0)));
 
-        // bool t = tokenOut.transfer(msg.sender, FHE.asEuint32(amountOut));
-        // require(t);
+        bool t = tokenOut.transfer(msg.sender,amountOut);
+        require(t);
 
-        // _update(FHE.asEuint8(token0.EuintbalanceOf(address(this))),FHE.asEuint8(token1.EuintbalanceOf(address(this))));
+        _update(token0.EuintbalanceOf(address(this)),token1.EuintbalanceOf(address(this)));
     }
 
     function addLiquidity(inEuint8 calldata _amount0,inEuint8 calldata _amount1) external returns(euint8 shares) {
@@ -98,7 +97,7 @@ contract EncryptedPairEuint8 is Permissioned {
         require(t0 && t1);
 
         if (FHE.decrypt(FHE.or(FHE.gt(reserve0,FHE.asEuint8(0)), FHE.gt(reserve1,FHE.asEuint8(0))))) {
-            FHE.req(FHE.eq(FHE.mul(reserve0, amount0),FHE.mul(reserve1,amount1)));
+            FHE.req(FHE.eq(FHE.mul(reserve0, amount1),FHE.mul(reserve1,amount0)));
         }
 
         if (FHE.decrypt(FHE.eq(totalSupply,FHE.asEuint8(0)))) {
@@ -150,9 +149,9 @@ contract EncryptedPairEuint8 is Permissioned {
         FHE.req(FHE.gt(amount0,FHE.asEuint8(0)));
 
         bool t = token0.transfer(msg.sender, amount0);
-        // bool t2 = token1.transfer(msg.sender, FHE.asEuint32(amount1));
+        bool t2 = token1.transfer(msg.sender, (amount1));
 
-        // require(t && t2);
+        require(t && t2);
     }
 
     function _sqrt(euint8 a) private pure returns (uint z) {
@@ -176,5 +175,17 @@ contract EncryptedPairEuint8 is Permissioned {
         else {
             return y;
         }
+    }
+
+    function getReserve0() public view returns (uint8) {
+        return FHE.decrypt(reserve0);
+    }
+
+    function getReserve1() public view returns (uint8) {
+        return FHE.decrypt(reserve1);
+    }
+
+    function getTotalSupply() public view returns (uint8) {
+        return FHE.decrypt(totalSupply);
     }
 }
