@@ -5,7 +5,7 @@ import "@fhenixprotocol/contracts/FHE.sol";
 import "@fhenixprotocol/contracts/access/Permissioned.sol";
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
-contract MockBTC8bit is Permissioned, Ownable2Step {
+contract MockETH8Bit is Permissioned, Ownable2Step {
     event Transfer(address indexed from, address indexed to);
     event Approval(address indexed owner, address indexed spender);
     event Mint(address indexed to, uint8 amount);

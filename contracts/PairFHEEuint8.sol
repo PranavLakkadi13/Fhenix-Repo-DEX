@@ -2,15 +2,16 @@
 pragma solidity ^0.8.19;
 
 import "@fhenixprotocol/contracts/FHE.sol";
-import "./test/IEncryptedERC20.sol";
+// import "./test/IEncryptedERC208bit.sol";
+import { IEncryptedERC208bit } from "./test/IEncryptedERC208bit.sol";
 import "@fhenixprotocol/contracts/access/Permissioned.sol";
 
 contract EncryptedPairEuint8 is Permissioned {
     // using FHE for euint32;
     // IERC20 public token0;
-    IEncryptedERC20 public token0;
+    IEncryptedERC208bit public token0;
     // IERC20 public token1;
-    IEncryptedERC20 public token1;
+    IEncryptedERC208bit public token1;
     // address public  factory;
     address public factory;
 
@@ -37,8 +38,8 @@ contract EncryptedPairEuint8 is Permissioned {
 
     function initialize(address _token0, address _token1) external {
         require(msg.sender == factory, 'Only Factory can call this'); // sufficient check
-        token0 = IEncryptedERC20(_token0);
-        token1 = IEncryptedERC20(_token1);
+        token0 = IEncryptedERC208bit(_token0);
+        token1 = IEncryptedERC208bit(_token1);
     }
 
     function _mint(address _to, euint8 _amount) private {
@@ -63,7 +64,7 @@ contract EncryptedPairEuint8 is Permissioned {
         );
 
         bool isToken0 = _tokenIn == address(token0);
-        (IEncryptedERC20 tokenIn, IEncryptedERC20 tokenOut, euint8 reserveIn, euint8 reserveOut) = isToken0
+        (IEncryptedERC208bit tokenIn, IEncryptedERC208bit tokenOut, euint8 reserveIn, euint8 reserveOut) = isToken0
             ? (token0, token1, reserve0, reserve1)
             : (token1, token0, reserve1, reserve0);
 
@@ -71,7 +72,7 @@ contract EncryptedPairEuint8 is Permissioned {
 
         FHE.req(FHE.ne(amountIn,FHE.asEuint8(0)));
 
-        bool k = tokenIn.transferFrom(msg.sender, address(this), FHE.asEuint32(amountIn));
+        bool k = tokenIn.transferFrom(msg.sender, address(this), amountIn);
         require(k);
 
         // euint32 amountInWithFee = FHE.div(FHE.mul(amountIn, FHE.asEuint32(997)), FHE.asEuint32(1000));
@@ -91,8 +92,8 @@ contract EncryptedPairEuint8 is Permissioned {
         euint8 amount0 = FHE.asEuint8(_amount0);
         euint8 amount1 = FHE.asEuint8(_amount1);
 
-        bool t0 = token0.transferFrom(msg.sender, address(this), FHE.asEuint32(amount0));
-        bool t1 = token1.transferFrom(msg.sender, address(this), FHE.asEuint32(amount1));
+        bool t0 = token0.transferFrom(msg.sender, address(this), amount0);
+        bool t1 = token1.transferFrom(msg.sender, address(this), amount1);
 
         require(t0 && t1);
 
@@ -114,7 +115,7 @@ contract EncryptedPairEuint8 is Permissioned {
 
         _mint(msg.sender, shares);
 
-        _update(FHE.asEuint8(token0.EuintbalanceOf(address(this))), FHE.asEuint8(token1.EuintbalanceOf(address(this))));
+        _update(token0.EuintbalanceOf(address(this)), token1.EuintbalanceOf(address(this)));
     
         return shares;
     }
@@ -126,8 +127,8 @@ contract EncryptedPairEuint8 is Permissioned {
 
         euint8 shares = FHE.asEuint8(_shares);
     
-        euint8 bal0 = FHE.asEuint8(token0.EuintbalanceOf(address(this)));
-        euint8 bal1 = FHE.asEuint8(token1.EuintbalanceOf(address(this)));
+        euint8 bal0 = token0.EuintbalanceOf(address(this));
+        euint8 bal1 = token1.EuintbalanceOf(address(this));
 
         FHE.req(FHE.and(FHE.ne(bal0,FHE.asEuint8(0)),FHE.ne(bal1,FHE.asEuint8(0))));
 
@@ -146,9 +147,9 @@ contract EncryptedPairEuint8 is Permissioned {
         // // // _update(bal0 - amount0, bal1 - amount1);
         _update(FHE.sub(bal0,amount0), FHE.sub(bal1,amount1));
 
-        FHE.req(FHE.gt(FHE.asEuint32(amount0),FHE.asEuint32(0)));
+        FHE.req(FHE.gt(amount0,FHE.asEuint8(0)));
 
-        bool t = token0.transfer(msg.sender, FHE.asEuint32(amount0));
+        bool t = token0.transfer(msg.sender, amount0);
         // bool t2 = token1.transfer(msg.sender, FHE.asEuint32(amount1));
 
         // require(t && t2);
