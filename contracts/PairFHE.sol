@@ -2,7 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "@fhenixprotocol/contracts/FHE.sol";
-import "./IEncryptedERC20.sol";
+import "./test/IEncryptedERC20.sol";
 import "@fhenixprotocol/contracts/access/Permissioned.sol";
 import {FHE, euint32, inEuint8} from "@fhenixprotocol/contracts/FHE.sol";
 
