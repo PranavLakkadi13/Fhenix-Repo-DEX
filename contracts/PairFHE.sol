@@ -167,25 +167,25 @@ contract EncryptedPair is Permissioned {
 
         require(t0 && t1);
 
-        // if (FHE.decrypt(FHE.or(FHE.gt(reserve0,FHE.asEuint32(0)), FHE.gt(reserve1,FHE.asEuint32(0))))) {
-        //     FHE.req(FHE.eq(FHE.mul(reserve0, amount0),FHE.mul(reserve1,amount1)));
-        // }
+        if (FHE.decrypt(FHE.or(FHE.gt(reserve0,FHE.asEuint32(0)), FHE.gt(reserve1,FHE.asEuint32(0))))) {
+            FHE.req(FHE.eq(FHE.mul(reserve0, amount0),FHE.mul(reserve1,amount1)));
+        }
 
-        // if (FHE.decrypt(FHE.eq(totalSupply,FHE.asEuint32(0)))) {
-        //     shares = FHE.asEuint32(_sqrt(FHE.decrypt(FHE.mul(amount0, amount1))));
-        // }
-        // else {
-        //     euint32 x = FHE.div(FHE.mul(amount0,totalSupply),reserve0);
-        //     euint32 y = FHE.div(FHE.mul(amount1,totalSupply),reserve1);
+        if (FHE.decrypt(FHE.eq(totalSupply,FHE.asEuint32(0)))) {
+            shares = FHE.asEuint32(_sqrt(FHE.decrypt(FHE.mul(amount0, amount1))));
+        }
+        else {
+            euint32 x = FHE.div(FHE.mul(amount0,totalSupply),reserve0);
+            euint32 y = FHE.div(FHE.mul(amount1,totalSupply),reserve1);
 
-        //     shares = _min(x, y);
-        // }
+            shares = _min(x, y);
+        }
 
-        // FHE.req(FHE.gt(shares,FHE.asEuint32(0)));
+        FHE.req(FHE.gt(shares,FHE.asEuint32(0)));
 
-        // _mint(msg.sender, shares);
+        _mint(msg.sender, shares);
 
-        // _update(token0.EuintbalanceOf(address(this)), token1.EuintbalanceOf(address(this)));
+        _update(token0.EuintbalanceOf(address(this)), token1.EuintbalanceOf(address(this)));
     }
 
     // function removeLiquidity(

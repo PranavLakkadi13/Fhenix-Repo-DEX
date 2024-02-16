@@ -5,7 +5,7 @@ import "@fhenixprotocol/contracts/FHE.sol";
 import "@fhenixprotocol/contracts/access/Permissioned.sol";
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
-interface IEncryptedERC20 {
+interface IEncryptedERC2016bit {
     // event Transfer(address indexed from, address indexed to);
     // event Approval(address indexed owner, address indexed spender);
     // event Mint(address indexed to, uint32 amount);
