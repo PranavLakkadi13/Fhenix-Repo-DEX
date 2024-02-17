@@ -125,6 +125,8 @@ contract EncryptedPairEuint8 is Permissioned {
     ) external returns (euint8 amount0, euint8 amount1) {
 
         euint8 shares = FHE.asEuint8(_shares);
+
+        FHE.req(FHE.gte(balances[msg.sender],shares));
     
         euint8 bal0 = token0.EuintbalanceOf(address(this));
         euint8 bal1 = token1.EuintbalanceOf(address(this));

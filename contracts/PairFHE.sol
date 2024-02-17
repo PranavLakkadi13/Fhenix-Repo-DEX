@@ -170,7 +170,7 @@ contract EncryptedPair is Permissioned {
         if (FHE.decrypt(FHE.or(FHE.gt(reserve0,FHE.asEuint32(0)), FHE.gt(reserve1,FHE.asEuint32(0))))) {
             FHE.req(FHE.eq(FHE.mul(reserve0, amount0),FHE.mul(reserve1,amount1)));
         }
-
+        
         if (FHE.decrypt(FHE.eq(totalSupply,FHE.asEuint32(0)))) {
             shares = FHE.asEuint32(_sqrt(FHE.decrypt(FHE.mul(amount0, amount1))));
         }
@@ -215,6 +215,8 @@ contract EncryptedPair is Permissioned {
     ) external returns (euint32 amount0, euint32 amount1) {
     
         euint32 shares = FHE.asEuint32(_shares);
+
+        FHE.req(FHE.gte(balances[msg.sender],shares));
 
         euint32 bal0 = token0.EuintbalanceOf(address(this));
         euint32 bal1 = token1.EuintbalanceOf(address(this));

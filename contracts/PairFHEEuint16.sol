@@ -74,11 +74,16 @@ contract EncryptedPairEuint16 is Permissioned {
         bool k = tokenIn.transferFrom(msg.sender, address(this), amountIn);
         require(k);
 
-        // euint32 amountInWithFee = FHE.div(FHE.mul(amountIn, FHE.asEuint32(997)), FHE.asEuint32(1000));
+        // euint16 amountInWithFee = FHE.div(FHE.mul(amountIn, FHE.asEuint16(997)), FHE.asEuint16(1000));
 
         // amountOut = FHE.div(FHE.mul(reserveOut,amountInWithFee), FHE.add(reserveIn, amountInWithFee));
 
         amountOut = FHE.div(FHE.mul(reserveOut, amountIn), FHE.add(reserveIn, amountIn));
+
+
+        if (FHE.decrypt(FHE.eq(amountOut,FHE.asEuint16(0)))) {
+            amountOut = FHE.asEuint16(1);
+        }
         
         FHE.req(FHE.gt(amountOut,FHE.asEuint16(0)));
 
@@ -104,9 +109,11 @@ contract EncryptedPairEuint16 is Permissioned {
         if (FHE.decrypt(FHE.eq(totalSupply,FHE.asEuint16(0)))) {
             shares = FHE.asEuint16(_sqrt(FHE.mul(amount0,amount1)));
         }
-        else {
+        if (FHE.decrypt(FHE.gt(totalSupply,FHE.asEuint16(0)))) {
             euint16 x = FHE.div(FHE.mul(amount0,totalSupply),reserve0);
             euint16 y = FHE.div(FHE.mul(amount1,totalSupply),reserve1);
+            // euint16 x = FHE.mul(amount0,FHE.div(totalSupply,reserve0));
+            // euint16 y = FHE.mul(amount1,FHE.div(totalSupply,reserve1));
 
             shares = _min(x, y);
         }
@@ -126,6 +133,8 @@ contract EncryptedPairEuint16 is Permissioned {
     ) external returns (euint16 amount0, euint16 amount1) {
 
         euint16 shares = FHE.asEuint16(_shares);
+
+        FHE.req(FHE.gte(balances[msg.sender],shares));
     
         euint16 bal0 = token0.EuintbalanceOf(address(this));
         euint16 bal1 = token1.EuintbalanceOf(address(this));
@@ -148,9 +157,10 @@ contract EncryptedPairEuint16 is Permissioned {
         _update(FHE.sub(bal0,amount0), FHE.sub(bal1,amount1));
 
         FHE.req(FHE.gt(amount0,FHE.asEuint16(0)));
+        FHE.req(FHE.gt(amount1,FHE.asEuint16(0)));
 
         bool t = token0.transfer(msg.sender, amount0);
-        bool t2 = token1.transfer(msg.sender, (amount1));
+        bool t2 = token1.transfer(msg.sender, amount1);
 
         require(t && t2);
     }
